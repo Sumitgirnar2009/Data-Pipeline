@@ -1,0 +1,21 @@
+version: 0.2
+
+# ─────────────────────────────────────────────────────────────
+# Stage 2: Create/update Service Catalog products and provision
+# ─────────────────────────────────────────────────────────────
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install boto3 --quiet
+
+  build:
+    commands:
+      - echo "=== Deploying products to Service Catalog ==="
+      - python scripts/deploy_products.py
+
+artifacts:
+  files:
+    - "**/*"

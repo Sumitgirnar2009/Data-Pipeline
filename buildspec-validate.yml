@@ -1,0 +1,82 @@
+version: 0.2
+
+# ─────────────────────────────────────────────────────────────
+# Stage 1: Validate all CFN templates + upload to S3
+# Runs on every git push
+# ─────────────────────────────────────────────────────────────
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install cfn-lint --quiet
+
+  pre_build:
+    commands:
+      - echo "=== Validating CloudFormation templates ==="
+      - |
+        FAILED=0
+        for template in $(find products -name "template.yaml"); do
+          echo "→ Validating: $template"
+
+          # cfn-lint static analysis
+          cfn-lint "$template" && echo "  ✓ cfn-lint passed" || { echo "  ✗ cfn-lint FAILED"; FAILED=1; }
+
+          # AWS validate-template (catches more edge cases)
+          aws cloudformation validate-template \
+            --template-body "file://$template" \
+            --region $AWS_REGION_NAME > /dev/null \
+            && echo "  ✓ AWS validate passed" \
+            || { echo "  ✗ AWS validate FAILED"; FAILED=1; }
+        done
+        if [ $FAILED -ne 0 ]; then
+          echo "One or more templates failed validation. Stopping."
+          exit 1
+        fi
+
+  build:
+    commands:
+      - echo "=== Uploading templates to S3 ==="
+      - |
+        # Derive git short SHA for versioning
+        GIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "manual")
+        echo "Git SHA: $GIT_SHA"
+
+        for product_dir in products/*/; do
+          PRODUCT_NAME=$(basename "$product_dir")
+          TEMPLATE_PATH="$product_dir/template.yaml"
+          CONFIG_PATH="$product_dir/product-config.json"
+
+          if [ ! -f "$TEMPLATE_PATH" ]; then
+            echo "Skipping $PRODUCT_NAME (no template.yaml)"
+            continue
+          fi
+
+          # Upload template with versioned key
+          S3_KEY="products/$PRODUCT_NAME/$GIT_SHA/template.yaml"
+          aws s3 cp "$TEMPLATE_PATH" "s3://$TEMPLATE_BUCKET/$S3_KEY"
+          echo "  ✓ Uploaded $PRODUCT_NAME → s3://$TEMPLATE_BUCKET/$S3_KEY"
+
+          # Also upload "latest" pointer
+          aws s3 cp "$TEMPLATE_PATH" "s3://$TEMPLATE_BUCKET/products/$PRODUCT_NAME/latest/template.yaml"
+        done
+
+      - echo "=== Writing version manifest ==="
+      - |
+        GIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "manual")
+        GIT_MSG=$(git log -1 --pretty=%s 2>/dev/null || echo "manual deploy")
+        cat > version-manifest.json << EOF
+        {
+          "gitSha": "$GIT_SHA",
+          "gitMessage": "$GIT_MSG",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "templateBucket": "$TEMPLATE_BUCKET"
+        }
+        EOF
+        cat version-manifest.json
+
+artifacts:
+  files:
+    - "**/*"
+  name: ValidatedArtifacts
