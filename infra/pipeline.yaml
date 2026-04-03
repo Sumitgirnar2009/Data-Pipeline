@@ -1,0 +1,311 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CI/CD Pipeline - Git push auto-creates and provisions Service Catalog products
+
+Parameters:
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or org
+  GitHubRepo:
+    Type: String
+    Description: Repository name
+  GitHubBranch:
+    Type: String
+    Default: main
+  GitHubConnectionArn:
+    Type: String
+    Description: CodeStar connection ARN for GitHub (create via Console > CodePipeline > Connections)
+  PortfolioName:
+    Type: String
+    Default: DataPipelinePortfolio
+  PortfolioDescription:
+    Type: String
+    Default: Data pipeline products for learning
+
+Resources:
+
+  # ─────────────────────────────────────────────
+  # S3: stores CloudFormation templates
+  # ─────────────────────────────────────────────
+  TemplateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "sc-templates-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "codepipeline-artifacts-${AWS::AccountId}-${AWS::Region}"
+
+  # ─────────────────────────────────────────────
+  # Service Catalog Portfolio
+  # ─────────────────────────────────────────────
+  DataPipelinePortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      DisplayName: !Ref PortfolioName
+      Description: !Ref PortfolioDescription
+      ProviderName: DataTeam
+
+  # ─────────────────────────────────────────────
+  # IAM: CodeBuild role
+  # ─────────────────────────────────────────────
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DataPipelineCodeBuildRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt TemplateBucket.Arn
+                  - !Sub "${TemplateBucket.Arn}/*"
+                  - !GetAtt ArtifactBucket.Arn
+                  - !Sub "${ArtifactBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - cloudformation:ValidateTemplate
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - servicecatalog:CreateProduct
+                  - servicecatalog:UpdateProduct
+                  - servicecatalog:CreateProvisioningArtifact
+                  - servicecatalog:UpdateProvisioningArtifact
+                  - servicecatalog:DescribeProduct
+                  - servicecatalog:SearchProductsAsAdmin
+                  - servicecatalog:ListPortfolios
+                  - servicecatalog:AssociateProductWithPortfolio
+                  - servicecatalog:ProvisionProduct
+                  - servicecatalog:ListProvisionedProductPlans
+                  - servicecatalog:DescribeProvisionedProduct
+                  - servicecatalog:UpdateProvisionedProduct
+                  - servicecatalog:ListProvisioningArtifacts
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt ServiceCatalogLaunchRole.Arn
+
+  # ─────────────────────────────────────────────
+  # IAM: CodePipeline role
+  # ─────────────────────────────────────────────
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: DataPipelineCodePipelineRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodePipelinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !GetAtt ArtifactBucket.Arn
+                  - !Sub "${ArtifactBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                Resource: !Ref GitHubConnectionArn
+
+  # ─────────────────────────────────────────────
+  # IAM: Service Catalog launch role
+  # (used when SC provisions the CFN stack)
+  # ─────────────────────────────────────────────
+  ServiceCatalogLaunchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ServiceCatalogDataPipelineLaunchRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: servicecatalog.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/AmazonRDSFullAccess
+      Policies:
+        - PolicyName: CloudFormationAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:GetTemplateSummary
+                  - iam:PassRole
+                  - iam:CreateRole
+                  - iam:AttachRolePolicy
+                  - iam:DeleteRole
+                  - iam:DetachRolePolicy
+                Resource: "*"
+
+  # ─────────────────────────────────────────────
+  # CodeBuild: validate + upload templates
+  # ─────────────────────────────────────────────
+  ValidateAndUploadProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: SC-Validate-Upload
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: TEMPLATE_BUCKET
+            Value: !Ref TemplateBucket
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-validate.yml
+
+  # ─────────────────────────────────────────────
+  # CodeBuild: deploy to Service Catalog
+  # ─────────────────────────────────────────────
+  DeployToServiceCatalogProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: SC-Deploy-Products
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: TEMPLATE_BUCKET
+            Value: !Ref TemplateBucket
+          - Name: PORTFOLIO_NAME
+            Value: !Ref PortfolioName
+          - Name: PORTFOLIO_ID
+            Value: !Ref DataPipelinePortfolio
+          - Name: LAUNCH_ROLE_ARN
+            Value: !GetAtt ServiceCatalogLaunchRole.Arn
+          - Name: AWS_ACCOUNT_ID
+            Value: !Ref AWS::AccountId
+          - Name: AWS_REGION_NAME
+            Value: !Ref AWS::Region
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-deploy.yml
+
+  # ─────────────────────────────────────────────
+  # CodePipeline
+  # ─────────────────────────────────────────────
+  DataPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: DataPipelineServiceCatalogCI
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: GitHubSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: '1'
+              Configuration:
+                ConnectionArn: !Ref GitHubConnectionArn
+                FullRepositoryId: !Sub "${GitHubOwner}/${GitHubRepo}"
+                BranchName: !Ref GitHubBranch
+                OutputArtifactFormat: CODE_ZIP
+              OutputArtifacts:
+                - Name: SourceOutput
+
+        - Name: ValidateAndUpload
+          Actions:
+            - Name: ValidateTemplates
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref ValidateAndUploadProject
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: ValidatedOutput
+
+        - Name: Deploy
+          Actions:
+            - Name: DeployToServiceCatalog
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref DeployToServiceCatalogProject
+              InputArtifacts:
+                - Name: ValidatedOutput
+
+Outputs:
+  TemplateBucketName:
+    Value: !Ref TemplateBucket
+  PortfolioId:
+    Value: !Ref DataPipelinePortfolio
+  PipelineName:
+    Value: !Ref DataPipeline
+  LaunchRoleArn:
+    Value: !GetAtt ServiceCatalogLaunchRole.Arn
