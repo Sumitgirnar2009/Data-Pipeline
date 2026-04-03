@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Simple Lambda Product
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: MySampleLambda
+      Runtime: python3.9
+      Handler: app.lambda_handler
+      CodeUri: .
+      MemorySize: 128
+      Timeout: 10
+      Description: Sample Lambda function
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+Outputs:
+  LambdaFunctionName:
+    Value: !Ref MyLambdaFunction
