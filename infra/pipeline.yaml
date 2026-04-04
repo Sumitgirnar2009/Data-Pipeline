@@ -22,6 +22,8 @@ Parameters:
     Type: String
     Default: Data pipeline products for learning
 
+
+
 Resources:
 
   # ─────────────────────────────────────────────
@@ -209,6 +211,8 @@ Resources:
         EnvironmentVariables:
           - Name: TEMPLATE_BUCKET
             Value: !Ref TemplateBucket
+          - Name: AWS_REGION_NAME        ← present here
+            Value: !Ref AWS::Region
       Source:
         Type: CODEPIPELINE
         BuildSpec: buildspec-validate.yml
