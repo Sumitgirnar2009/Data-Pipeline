@@ -34,11 +34,7 @@ cfn = boto3.client("cloudformation",  region_name=REGION)
 # ─── helpers ────────────────────────────────────────────────────────────────
 
 def git_sha() -> str:
-    # CodeBuild provides this automatically — no git needed
-    sha = os.environ.get("CODEBUILD_RESOLVED_SOURCE_VERSION", "")
-    if sha:
-        return sha[:8]   # use first 8 chars
-    return os.environ.get("CODEBUILD_BUILD_NUMBER", "manual")
+    return "latest"
 
 
 def s3_template_url(product_name: str, sha: str) -> str:
