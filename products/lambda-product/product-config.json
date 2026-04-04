@@ -1,14 +1,6 @@
 {
   "productName": "LambdaProduct",
-  "owner": "DataTeam",
   "description": "Simple Lambda deployed via Service Catalog",
-  "template_file": "template.yaml",
-  "provisioning_artifact_name": "v1",
-  "provisioning_artifact_description": "Initial version",
-  "provisioning_parameters": [
-    {
-      "ParameterKey": "FunctionName",
-      "ParameterValue": "MySampleLambda"
-    }
-  ]
+  "autoProvision": true,
+  "provisioningParameters": []
 }
