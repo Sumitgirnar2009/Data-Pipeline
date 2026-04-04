@@ -211,7 +211,7 @@ Resources:
         EnvironmentVariables:
           - Name: TEMPLATE_BUCKET
             Value: !Ref TemplateBucket
-          - Name: AWS_REGION_NAME        ← present here
+          - Name: AWS_REGION_NAME
             Value: !Ref AWS::Region
       Source:
         Type: CODEPIPELINE
