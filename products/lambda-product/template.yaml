@@ -1,21 +1,43 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
 Description: Simple Lambda Product
 
 Resources:
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MySampleLambdaRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
   MyLambdaFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Lambda::Function
     Properties:
       FunctionName: MySampleLambda
-      Runtime: python3.9
+      Runtime: python3.11
       Handler: app.lambda_handler
-      CodeUri: .
+      Role: !GetAtt LambdaRole.Arn
       MemorySize: 128
       Timeout: 10
       Description: Sample Lambda function
-      Policies:
-        - AWSLambdaBasicExecutionRole
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              print("Hello from Lambda!")
+              return {
+                  "statusCode": 200,
+                  "body": "Hello from Lambda!"
+              }
 
 Outputs:
   LambdaFunctionName:
     Value: !Ref MyLambdaFunction
+  LambdaArn:
+    Value: !GetAtt MyLambdaFunction.Arn
