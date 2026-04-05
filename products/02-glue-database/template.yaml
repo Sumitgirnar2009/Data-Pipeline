@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Simple Glue Database
+
+Parameters:
+  DatabaseName:
+    Type: String
+    Default: my_glue_database
+    Description: Name of the Glue database
+
+Resources:
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref DatabaseName
+        Description: Simple Glue database created via CloudFormation
+
+Outputs:
+  GlueDatabaseName:
+    Value: !Ref GlueDatabase
+    Description: Name of the created Glue database
