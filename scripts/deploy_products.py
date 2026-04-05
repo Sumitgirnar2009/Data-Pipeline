@@ -109,6 +109,7 @@ def deploy_product(config_path: Path,provision_product_name):
     logging.info(f"Product: {product_name}")
     logging.info(f"Template: {template_url}")
 
+
     # ── 1. Create / Update Product ───────────────────────────────
     product_id = find_product_id(product_name)
 
