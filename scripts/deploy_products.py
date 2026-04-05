@@ -88,7 +88,7 @@ def aws_call(fn, *args, **kwargs):
 
 # ─── main logic ───────────────────────────────────────────────────
 
-def deploy_product(config_path: Path):
+def deploy_product(config_path: Path,provision_product_name):
     logging.info(f"Processing config: {config_path}")
 
     config = json.loads(config_path.read_text())
@@ -104,7 +104,7 @@ def deploy_product(config_path: Path):
 
     version_name = f"{product_version}"
     template_url = s3_template_url(product_name, version_name)
-    pp_name      = f"{product_name}-live"
+    pp_name      = f"{provision_product_name}"
 
     logging.info(f"Product: {product_name}")
     logging.info(f"Template: {template_url}")
@@ -226,7 +226,7 @@ def main():
 
     for cfg in configs:
         try:
-            deploy_product(cfg)
+            deploy_product(cfg,cfg.parent.name)
         except Exception as e:
             logging.error(f"❌ Failed for {cfg.parent.name}")
             traceback.print_exc()
