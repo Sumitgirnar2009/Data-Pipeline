@@ -122,7 +122,15 @@ Resources:
 
   # ─────────────────────────────────────────────
   # IAM: CodePipeline role
-  # ─────────────────────────────────────────────
+  # ─────────────────────────────────────────────\
+
+  PortfolioPrincipalAssociation:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      PrincipalARN: !GetAtt CodeBuildRole.Arn
+      PrincipalType: IAM
+
   CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -306,6 +314,8 @@ Resources:
                 ProjectName: !Ref DeployToServiceCatalogProject
               InputArtifacts:
                 - Name: ValidatedOutput
+
+
 
 Outputs:
   TemplateBucketName:
