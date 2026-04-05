@@ -127,7 +127,7 @@ Resources:
   PortfolioPrincipalAssociation:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Properties:
-      PortfolioId: !Ref ServiceCatalogPortfolio
+      PortfolioId: !Ref DataPipelinePortfolio
       PrincipalARN: !GetAtt CodeBuildRole.Arn
       PrincipalType: IAM
 
