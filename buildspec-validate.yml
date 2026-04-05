@@ -11,8 +11,7 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - pip install cfn-lint --quiet
-      - yum install -y jq
-
+      - apt-get update && apt-get install -y jq
   pre_build:
     commands:
       - echo "=== Validating CloudFormation templates ==="
