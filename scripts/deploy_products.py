@@ -63,13 +63,22 @@ def list_artifact_names(product_id: str):
 
 
 def find_provisioned_product(pp_name: str):
-    paginator = sc.get_paginator("search_provisioned_products")
-    for page in paginator.paginate(Filters={"SearchQuery": [f"name:{pp_name}"]}):
-        for pp in page.get("ProvisionedProducts", []):
+    """Return the provisioned product if exists"""
+    try:
+        resp = sc.search_provisioned_products(
+            Filters={"SearchQuery": [f"name:{pp_name}"]}
+        )
+
+        for pp in resp.get("ProvisionedProducts", []):
             if pp["Name"] == pp_name:
                 return pp
-    return None
 
+        return None
+
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
 
 def aws_call(fn, *args, **kwargs):
     """Wrapper to log AWS errors properly"""
