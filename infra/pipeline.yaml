@@ -100,6 +100,7 @@ Resources:
                 Action:
                   - servicecatalog:CreateProduct
                   - servicecatalog:UpdateProduct
+                  - servicecatalog:CreateConstraint
                   - servicecatalog:CreateProvisioningArtifact
                   - servicecatalog:UpdateProvisioningArtifact
                   - servicecatalog:DescribeProduct
