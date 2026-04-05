@@ -5,7 +5,7 @@ Parameters:
   DatabaseName:
     Type: String
     Default: my_glue_database
-    Description: Name of the Glue database
+    Description: Name of the Glue database -22
 
 Resources:
   GlueDatabase:
