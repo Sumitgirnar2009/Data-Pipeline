@@ -99,7 +99,7 @@ def deploy_product(config_path: Path):
     parameters     = config.get("provisioningParameters", [])
     product_version = config.get("productVersion", "latest")
 
-    version_name = f"v-{product_version}"
+    version_name = f"{product_version}"
     template_url = s3_template_url(product_name, version_name)
     pp_name      = f"{product_name}-live"
 
