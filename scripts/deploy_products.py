@@ -40,12 +40,8 @@ cfn = boto3.client("cloudformation",  region_name=REGION)
 
 # ─── helpers ──────────────────────────────────────────────────────
 
-def git_sha() -> str:
-    return "latest"
-
-
-def s3_template_url(product_name: str, sha: str) -> str:
-    return f"https://{TEMPLATE_BUCKET}.s3.{REGION}.amazonaws.com/products/{product_name}/{sha}/template.yaml"
+def s3_template_url(product_name: str, prdouct_version: str) -> str:
+    return f"https://{TEMPLATE_BUCKET}.s3.{REGION}.amazonaws.com/products/{product_name}/{prdouct_version}/template.yaml"
 
 
 def find_product_id(product_name: str):
@@ -101,10 +97,10 @@ def deploy_product(config_path: Path):
     description    = config.get("description", "")
     auto_provision = config.get("autoProvision", True)
     parameters     = config.get("provisioningParameters", [])
+    product_version = config.get("productVersion", "latest")
 
-    sha          = git_sha()
-    version_name = f"v-{sha}"
-    template_url = s3_template_url(product_name, sha)
+    version_name = f"v-{product_version}"
+    template_url = s3_template_url(product_name, version_name)
     pp_name      = f"{product_name}-live"
 
     logging.info(f"Product: {product_name}")
@@ -124,7 +120,7 @@ def deploy_product(config_path: Path):
             Owner=f"account/{ACCOUNT_ID}",
             ProvisioningArtifactParameters={
                 "Name": version_name,
-                "Description": f"Auto-deployed from git {sha}",
+                "Description": f"Auto-deployed from git {product_version}",
                 "Type": "CLOUD_FORMATION_TEMPLATE",
                 "Info": {"LoadTemplateFromURL": template_url},
             },
@@ -169,7 +165,7 @@ def deploy_product(config_path: Path):
                 ProductId=product_id,
                 Parameters={
                     "Name": version_name,
-                    "Description": f"Auto-deployed from git {sha}",
+                    "Description": f"Auto-deployed from git {product_version}",
                     "Type": "CLOUD_FORMATION_TEMPLATE",
                     "Info": {"LoadTemplateFromURL": template_url},
                 },
