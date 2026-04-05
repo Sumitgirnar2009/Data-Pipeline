@@ -99,6 +99,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - servicecatalog:CreateProduct
+                  - servicecatalog:ListLaunchPaths
                   - servicecatalog:UpdateProduct
                   - servicecatalog:CreateConstraint
                   - servicecatalog:SearchProvisionedProducts
