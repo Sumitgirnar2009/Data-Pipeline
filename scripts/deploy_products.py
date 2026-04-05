@@ -98,6 +98,9 @@ def deploy_product(config_path: Path):
     auto_provision = config.get("autoProvision", True)
     parameters     = config.get("provisioningParameters", [])
     product_version = config.get("productVersion", "latest")
+    support_description = config.get("supportDescription", "Default")
+    support_email = config.get("supportEmail", "Default")
+    support_link = config.get("supportLink", "Default")
 
     version_name = f"{product_version}"
     template_url = s3_template_url(product_name, version_name)
@@ -118,6 +121,9 @@ def deploy_product(config_path: Path):
             Description=description,
             ProductType="CLOUD_FORMATION_TEMPLATE",
             Owner=f"account/{ACCOUNT_ID}",
+            SupportDescription=support_description,
+            SupportEmail=support_email,
+            SupportUrl=support_link,
             ProvisioningArtifactParameters={
                 "Name": version_name,
                 "Description": f"Auto-deployed from git {product_version}",
