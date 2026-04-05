@@ -101,6 +101,7 @@ Resources:
                   - servicecatalog:CreateProduct
                   - servicecatalog:UpdateProduct
                   - servicecatalog:CreateConstraint
+                  - servicecatalog:SearchProvisionedProducts
                   - servicecatalog:CreateProvisioningArtifact
                   - servicecatalog:UpdateProvisioningArtifact
                   - servicecatalog:DescribeProduct
