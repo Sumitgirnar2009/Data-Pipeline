@@ -2,5 +2,6 @@
   "productName": "LambdaProduct",
   "description": "Simple Lambda deployed via Service Catalog",
   "autoProvision": true,
-  "provisioningParameters": []
+  "provisioningParameters": [],
+  "productVersion": "1.0.0"
 }
