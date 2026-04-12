@@ -14,7 +14,7 @@ Resources:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
         Name: !Ref DatabaseName
-        Description: Simple Glue database created via CloudFormation
+        Description: Simple Glue database created via CloudFormation 2
 
 Outputs:
   GlueDatabaseName:
