@@ -1,8 +1,0 @@
-{
-  "productName": "GlueDatabase",
-  "description": "Simple Glue Database deployed via Service Catalog",
-  "autoProvision": true,
-  "provisioningParameters": [],
-  "productVersion": "1.0.0"
-}
-
