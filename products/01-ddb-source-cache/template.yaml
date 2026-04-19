@@ -10,8 +10,6 @@ Resources:
       AttributeDefinitions:
         - AttributeName: Id
           AttributeType: S
-        - AttributeName: Data
-          AttributeType: S
       KeySchema:
         - AttributeName: Id
           KeyType: HASH
