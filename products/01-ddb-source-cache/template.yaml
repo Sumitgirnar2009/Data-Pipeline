@@ -1,38 +1,15 @@
-Type: AWS::DynamoDB::Table
-Properties:
-  AttributeDefinitions:
-    - AttributeDefinition
-  BillingMode: String
-  ContributorInsightsSpecification:
-    ContributorInsightsSpecification
-  DeletionProtectionEnabled: Boolean
-  GlobalSecondaryIndexes:
-    - GlobalSecondaryIndex
-  ImportSourceSpecification:
-    ImportSourceSpecification
-  KeySchema:
-    - KeySchema
-  KinesisStreamSpecification:
-    KinesisStreamSpecification
-  LocalSecondaryIndexes:
-    - LocalSecondaryIndex
-  OnDemandThroughput:
-    OnDemandThroughput
-  PointInTimeRecoverySpecification:
-    PointInTimeRecoverySpecification
-  ProvisionedThroughput:
-    ProvisionedThroughput
-  ResourcePolicy:
-    ResourcePolicy
-  SSESpecification:
-    SSESpecification
-  StreamSpecification:
-    StreamSpecification
-  TableClass: String
-  TableName: String
-  Tags:
-    - Tag
-  TimeToLiveSpecification:
-    TimeToLiveSpecification
-  WarmThroughput:
-    WarmThroughput
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create DynamoDB Table
+
+Resources:
+  PartyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SourceCache
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
