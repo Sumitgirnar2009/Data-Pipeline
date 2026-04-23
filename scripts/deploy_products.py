@@ -31,7 +31,7 @@ PORTFOLIO_ID    = get_env("PORTFOLIO_ID")
 LAUNCH_ROLE_ARN = get_env("LAUNCH_ROLE_ARN")
 ACCOUNT_ID      = get_env("AWS_ACCOUNT_ID")
 
-REGION = os.environ.get("AWS_REGION_NAME") or os.environ.get("AWS_DEFAULT_REGION") or "us-east-1"
+REGION = os.environ.get("AWS_REGION_NAME") or os.environ.get("AWS_DEFAULT_REGION") or "ap-south-1"
 
 logging.info(f"Using region: {REGION}")
 
