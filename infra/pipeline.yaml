@@ -204,6 +204,7 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:DeleteRole
                   - iam:DetachRolePolicy
+                  - iam:PutRolePolicy
                 Resource: "*"
 
   # ─────────────────────────────────────────────
