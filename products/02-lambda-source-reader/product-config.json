@@ -3,8 +3,8 @@
   "description": "Provision Lambda for ",
   "autoProvision": true,
   "provisioningParameters": [],
-  "productVersion": "1.0.3",
-  "supportDescription": "GTIS Product",
+  "productVersion": "1.0.4",
+  "supportDescription": "GTIS Product2",
   "supportEmail": "sumitgirnar09@gmail.com",
   "supportLink": "https://"
 }
