@@ -1,0 +1,10 @@
+{
+  "productName": "SourceReader-Lambda",
+  "description": "Provision Lambda for ",
+  "autoProvision": true,
+  "provisioningParameters": [],
+  "productVersion": "1.0.2",
+  "supportDescription": "GTIS Product",
+  "supportEmail": "sumitgirnar09@gmail.com",
+  "supportLink": "https://"
+}

@@ -15,3 +15,9 @@ Resources:
       KeySchema:
         - AttributeName: Id
           KeyType: HASH
+
+Outputs:
+  SourceCacheStreamArn:
+    Value: !GetAtt SourceCache.StreamArn
+    Export:
+      Name: SourceCache-StreamArn

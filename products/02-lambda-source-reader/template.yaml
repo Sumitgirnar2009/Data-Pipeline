@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  # 2️⃣ IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SourceStreamLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+      Policies:
+        - PolicyName: LambdaDynamoStreamPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: "*"
+
+
+  StreamProcessorLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SourceStreamProcessor
+      Runtime: python3.11
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+
+      Code:
+        ZipFile: |
+          from boto3.dynamodb.types import TypeDeserializer
+
+          deserializer = TypeDeserializer()
+
+          def deserialize(item):
+              return {k: deserializer.deserialize(v) for k, v in item.items()}
+
+          def lambda_handler(event, context):
+
+              for record in event['Records']:
+
+                  event_name = record['eventName']
+                  keys = deserialize(record['dynamodb']['Keys'])
+
+                  print("Event:", event_name)
+                  print("Keys:", keys)
+
+                  if 'NewImage' in record['dynamodb']:
+                      new_data = deserialize(record['dynamodb']['NewImage'])
+                      print("New Data:", new_data)
+
+                  if 'OldImage' in record['dynamodb']:
+                      old_data = deserialize(record['dynamodb']['OldImage'])
+                      print("Old Data:", old_data)
+
+              return {"statusCode": 200}
+
+  StreamMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !ImportValue SourceCache-StreamArn
+      FunctionName: !Ref StreamProcessorLambda
+      StartingPosition: LATEST
+      BatchSize: 10
+      Enabled: true
