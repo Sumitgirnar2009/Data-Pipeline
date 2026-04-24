@@ -1,7 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
-  # 2️⃣ IAM Role for Lambda
+
+  # IAM Role for Lambda
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -19,6 +20,7 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              # CloudWatch Logs
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
@@ -26,6 +28,7 @@ Resources:
                   - logs:PutLogEvents
                 Resource: "*"
 
+              # DynamoDB Streams
               - Effect: Allow
                 Action:
                   - dynamodb:DescribeStream
@@ -34,7 +37,13 @@ Resources:
                   - dynamodb:ListStreams
                 Resource: "*"
 
+              # S3 Write Permission (IMPORTANT - you missed this)
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: arn:aws:s3:::RawBucket/*
 
+  # Lambda Function
   StreamProcessorLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -47,16 +56,46 @@ Resources:
       Code:
         ZipFile: |
           from boto3.dynamodb.types import TypeDeserializer
+          import boto3
+          import json
+          from datetime import datetime
+
+          s3 = boto3.client('s3')
+          BUCKET_NAME = "RawBucket"
 
           deserializer = TypeDeserializer()
 
           def deserialize(item):
               return {k: deserializer.deserialize(v) for k, v in item.items()}
 
+          def uploadRecordToS3(records):
+              if not records:
+                  print("No records to upload")
+                  return
+
+              try:
+                  data = json.dumps(records)
+
+                  timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+                  key = f"raw_records_{timestamp}.json"
+
+                  s3.put_object(
+                      Bucket=BUCKET_NAME,
+                      Key=key,
+                      Body=data,
+                      ContentType='application/json'
+                  )
+
+                  print(f"Uploaded {len(records)} records to S3: {key}")
+
+              except Exception as e:
+                  print("Error uploading to S3:", str(e))
+                  raise
+
           def lambda_handler(event, context):
+              records = []
 
               for record in event['Records']:
-
                   event_name = record['eventName']
                   keys = deserialize(record['dynamodb']['Keys'])
 
@@ -66,13 +105,16 @@ Resources:
                   if 'NewImage' in record['dynamodb']:
                       new_data = deserialize(record['dynamodb']['NewImage'])
                       print("New Data:", new_data)
+                      records.append(new_data)
 
                   if 'OldImage' in record['dynamodb']:
                       old_data = deserialize(record['dynamodb']['OldImage'])
                       print("Old Data:", old_data)
 
+              uploadRecordToS3(records)
               return {"statusCode": 200}
 
+  # Event Source Mapping
   StreamMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
