@@ -16,7 +16,7 @@ Resources:
             Action: "kms:*"
             Resource: "*"
 
-  RawS3Bucket:
+  rawS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: "RawBucket"
@@ -28,7 +28,7 @@ Resources:
 
 Outputs:
   BucketName:
-    Value: !Ref MyS3Bucket
+    Value: !Ref rawS3Bucket
 
   KMSKeyArn:
     Value: !GetAtt MyKMSKey.Arn
