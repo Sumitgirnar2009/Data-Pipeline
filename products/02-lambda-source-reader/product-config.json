@@ -3,7 +3,7 @@
   "description": "Provision Lambda for ",
   "autoProvision": true,
   "provisioningParameters": [],
-  "productVersion": "1.0.4",
+  "productVersion": "1.0.5",
   "supportDescription": "GTIS Product2",
   "supportEmail": "sumitgirnar09@gmail.com",
   "supportLink": "https://"

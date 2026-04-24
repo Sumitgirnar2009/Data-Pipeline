@@ -3,7 +3,7 @@
   "description": "Create S3 Raw Bucket",
   "autoProvision": true,
   "provisioningParameters": [],
-  "productVersion": "1.0.0",
+  "productVersion": "1.0.1",
   "supportDescription": "GTIS Product3",
   "supportEmail": "sumitgirnar09@gmail.com",
   "supportLink": "https://"
