@@ -206,6 +206,7 @@ Resources:
                   - iam:DeleteRole
                   - iam:DetachRolePolicy
                   - iam:PutRolePolicy
+                  - kms:CreateKey
                 Resource: "*"
 
   # ─────────────────────────────────────────────
