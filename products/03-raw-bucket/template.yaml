@@ -16,10 +16,11 @@ Resources:
             Action: "kms:*"
             Resource: "*"
 
-  rawS3Bucket:
+  RawS3Bucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
     Properties:
-      BucketName: "RawBucket"
+      BucketName: "raw-bucket"
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -28,7 +29,7 @@ Resources:
 
 Outputs:
   BucketName:
-    Value: !Ref rawS3Bucket
+    Value: !Ref RawS3Bucket
 
   KMSKeyArn:
     Value: !GetAtt KMSKey.Arn
