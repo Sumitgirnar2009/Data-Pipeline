@@ -31,4 +31,4 @@ Outputs:
     Value: !Ref rawS3Bucket
 
   KMSKeyArn:
-    Value: !GetAtt MyKMSKey.Arn
+    Value: !GetAtt KMSKey.Arn
