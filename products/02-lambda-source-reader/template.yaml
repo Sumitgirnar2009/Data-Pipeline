@@ -59,11 +59,22 @@ Resources:
           import boto3
           import json
           from datetime import datetime
+          from decimal import Decimal
 
           s3 = boto3.client('s3')
           BUCKET_NAME = "RawBucket"
 
           deserializer = TypeDeserializer()
+          
+
+          def convert_decimal(obj):
+            if isinstance(obj, list):
+              return [convert_decimal(i) for i in obj]
+            elif isinstance(obj, dict):
+              return {k: convert_decimal(v) for k, v in obj.items()}
+            elif isinstance(obj, Decimal):
+              return int(obj) if obj % 1 == 0 else float(obj)
+            return obj
 
           def deserialize(item):
               return {k: deserializer.deserialize(v) for k, v in item.items()}
@@ -74,6 +85,8 @@ Resources:
                   return
 
               try:
+                  records = convert_decimal(records)
+  
                   data = json.dumps(records)
 
                   timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
