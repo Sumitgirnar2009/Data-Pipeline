@@ -37,6 +37,12 @@ Resources:
                   - dynamodb:ListStreams
                 Resource: "*"
 
+              # S3 bucket
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: "*"
+
               # S3 Write Permission (IMPORTANT - you missed this)
               - Effect: Allow
                 Action:
