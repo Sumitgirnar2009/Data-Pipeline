@@ -2,19 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
 
-  KMSKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: KMS key for S3 encryption
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect : Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: "kms:*"
-            Resource: "*"
 
   RawS3Bucket:
     Type: AWS::S3::Bucket
@@ -22,11 +9,14 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: "raw-bucket-287972983990"
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:*
+            Queue: !GetAtt RawReaderQueue.Arn
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: !Ref KMSKey
+              SSEAlgorithm: AES256
 
 Outputs:
   BucketName:

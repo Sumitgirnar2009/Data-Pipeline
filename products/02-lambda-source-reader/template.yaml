@@ -7,13 +7,13 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: SourceStreamLambdaExecutionRole
-      AssumeRolePolicyDocument:
+      AssumeRolePolicyDocument:  #Trust Policy : defines who is allowed to assume this role.
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
+            Action: sts:AssumeRole #Lambda is allowed to call STS AssumeRole on this role and obtain temporary credentials.
 
       Policies:
         - PolicyName: LambdaDynamoStreamPolicy
@@ -37,12 +37,15 @@ Resources:
                   - dynamodb:ListStreams
                 Resource: "*"
 
-
-
               # S3 Write Permission (IMPORTANT - you missed this)
               - Effect: Allow
                 Action:
                   - s3:PutObject
+                Resource: "*"
+
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
                 Resource: "*"
 
   # Lambda Function
@@ -64,7 +67,7 @@ Resources:
           from decimal import Decimal
 
           s3 = boto3.client('s3')
-          BUCKET_NAME = "RawBucket"
+          BUCKET_NAME = "raw-bucket-287972983990"
 
           deserializer = TypeDeserializer()
           

@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+
+  RawReaderQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: RawReaderQueue
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 345600  # 4 days
+
+Outputs:
+
+  QueueUrl:
+    Value: !Ref RawReaderQueue
+
+  QueueArn:
+    Value: !GetAtt RawReaderQueue.Arn
