@@ -16,3 +16,5 @@ Outputs:
 
   QueueArn:
     Value: !GetAtt RawReaderQueue.Arn
+    Export:
+      Name: RawReaderQueue-Arn

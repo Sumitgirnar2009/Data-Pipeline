@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
 
-
   RawS3Bucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -12,7 +11,7 @@ Resources:
       NotificationConfiguration:
         QueueConfigurations:
           - Event: s3:ObjectCreated:*
-            Queue: !GetAtt RawReaderQueue.Arn
+            Queue: !ImportValue RawReaderQueue-Arn
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -22,5 +21,3 @@ Outputs:
   BucketName:
     Value: !Ref RawS3Bucket
 
-  KMSKeyArn:
-    Value: !GetAtt KMSKey.Arn

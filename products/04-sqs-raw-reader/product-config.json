@@ -3,7 +3,7 @@
   "description": "Create SQS that reads messages from raw bucket",
   "autoProvision": true,
   "provisioningParameters": [],
-  "productVersion": "0.0.1",
+  "productVersion": "1.0.1",
   "supportDescription": "GTIS Product4",
   "supportEmail": "sumitgirnar09@gmail.com",
   "supportLink": "https://"
