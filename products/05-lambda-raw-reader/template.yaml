@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Resources:
 
   # IAM Role for Lambda
-  LambdaExecutionRole:
+  RawProcessorLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: RawStreamLambdaExecutionRole
@@ -55,7 +55,7 @@ Resources:
       FunctionName: RawMessageProcessor
       Runtime: python3.11
       Handler: index.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !GetAtt RawProcessorLambdaExecutionRole.Arn
       Timeout: 30
 
       Code:
