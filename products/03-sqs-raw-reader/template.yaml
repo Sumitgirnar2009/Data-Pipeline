@@ -8,6 +8,17 @@ Resources:
       QueueName: RawReaderQueue
       VisibilityTimeout: 60
       MessageRetentionPeriod: 345600  # 4 days
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt RawReaderQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: arn:aws:s3:::raw-bucket-287972983990
 
 Outputs:
 
