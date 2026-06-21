@@ -3,7 +3,7 @@
   "description": "Provision Lambda for raeding raw message from bucket",
   "autoProvision": true,
   "provisioningParameters": [],
-  "productVersion": "1.0.5",
+  "productVersion": "1.0.6",
   "supportDescription": "GTIS Product2",
   "supportEmail": "sumitgirnar09@gmail.com",
   "supportLink": "https://"
