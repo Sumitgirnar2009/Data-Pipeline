@@ -198,8 +198,12 @@ Resources:
                   - cloudformation:CreateStack
                   - cloudformation:DeleteStack
                   - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents        # ← ADD THIS
+                  - cloudformation:DescribeStackResource      # ← recommended
+                  - cloudformation:DescribeStackResources     # ← recommended
                   - cloudformation:UpdateStack
                   - cloudformation:GetTemplateSummary
+                  - cloudformation:GetTemplate               # ← recommended
                   - iam:PassRole
                   - iam:CreateRole
                   - iam:AttachRolePolicy
