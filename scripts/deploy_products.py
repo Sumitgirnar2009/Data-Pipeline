@@ -204,6 +204,9 @@ def deploy_product(config_path: Path,provision_product_name):
             return
 
         logging.info(f"Updating product: {pp_name}")
+        logging.info(
+            f"Provisioned Product {pp_name} status={pp['Status']}"
+        )
 
         aws_call(
             sc.update_provisioned_product,
