@@ -48,6 +48,13 @@ Resources:
                   - kms:GenerateDataKey
                 Resource: "*"
 
+              - Effect: Allow
+                Action:
+                  - "sqs:ReceiveMessage",
+                  - "sqs:DeleteMessage",
+                  - "sqs:GetQueueAttributes"
+                Resource: "*"
+
   # Lambda Function
   RawMessageProcessorLambda:
     Type: AWS::Lambda::Function
