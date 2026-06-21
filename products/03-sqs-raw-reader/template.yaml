@@ -7,11 +7,18 @@ Resources:
     Properties:
       QueueName: RawReaderQueue
       VisibilityTimeout: 60
-      MessageRetentionPeriod: 345600  # 4 days
+      MessageRetentionPeriod: 345600
+
+  RawReaderQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref RawReaderQueue
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
+          - Sid: AllowS3SendMessage
+            Effect: Allow
             Principal:
               Service: s3.amazonaws.com
             Action: sqs:SendMessage
