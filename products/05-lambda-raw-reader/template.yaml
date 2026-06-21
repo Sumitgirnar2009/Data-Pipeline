@@ -136,8 +136,8 @@ Resources:
   StreamMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
-      EventSourceArn: !ImportValue SourceCache-StreamArn
-      FunctionName: !Ref StreamProcessorLambda
+      EventSourceArn: !ImportValue RawReaderQueue-Arn
+      FunctionName: !Ref RawMessageProcessorLambda
       StartingPosition: LATEST
       BatchSize: 10
       Enabled: true
