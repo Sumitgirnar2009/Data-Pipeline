@@ -138,6 +138,5 @@ Resources:
     Properties:
       EventSourceArn: !ImportValue RawReaderQueue-Arn
       FunctionName: !Ref RawMessageProcessorLambda
-      StartingPosition: LATEST
       BatchSize: 10
       Enabled: true
