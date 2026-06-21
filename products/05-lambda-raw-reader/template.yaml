@@ -50,9 +50,9 @@ Resources:
 
               - Effect: Allow
                 Action:
-                  - "sqs:ReceiveMessage",
-                  - "sqs:DeleteMessage",
-                  - "sqs:GetQueueAttributes"
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
                 Resource: "*"
 
   # Lambda Function
